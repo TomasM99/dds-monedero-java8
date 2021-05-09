@@ -22,8 +22,12 @@ public class Cuenta {
     this.saldo = montoInicial;
   }
 
-  public void setMovimientos(List<Movimiento> movimientos) {
-    this.movimientos = movimientos;
+  public double getSaldo() {
+    return saldo;
+  }
+
+  public void setSaldo(double saldo) {
+    this.saldo = saldo;
   }
 
   public void poner(double cuanto) {
@@ -31,7 +35,7 @@ public class Cuenta {
     this.validarMontoNoNegativo(cuanto);
     this.validarMaximaCantidadDepositos();
 
-    this.agregarMovimiento(LocalDate.now(), cuanto, true);
+    this.agregarMovimiento(LocalDate.now(), cuanto, new Deposito());
     this.modificarSaldo(cuanto);
   }
 
@@ -41,7 +45,7 @@ public class Cuenta {
     this.validarNoSacarMasDeLoQueHay(cuanto);
     this.validarNoExtraerMasDelLimite(cuanto);
 
-    this.agregarMovimiento(LocalDate.now(), cuanto, false);
+    this.agregarMovimiento(LocalDate.now(), cuanto, new Extraccion());
     this.modificarSaldo(-cuanto);
   }
 
@@ -49,24 +53,9 @@ public class Cuenta {
     this.saldo += monto;
   }
 
-  public void agregarMovimiento(LocalDate fecha, double cuanto, boolean esDeposito) {
-    Movimiento movimiento = new Movimiento(fecha, cuanto, esDeposito);
+  public void agregarMovimiento(LocalDate fecha, double cuanto, TipoDeposito tipo) {
+    Movimiento movimiento = new Movimiento(fecha, cuanto, tipo);
     movimientos.add(movimiento);
-  }
-
-  public double getMontoExtraidoA(LocalDate fecha) {
-    return this.movimientos.stream()
-        .filter(movimiento -> movimiento.fueExtraido(fecha))
-        .mapToDouble(Movimiento::getMonto)
-        .sum();
-  }
-
-  public double getSaldo() {
-    return saldo;
-  }
-
-  public void setSaldo(double saldo) {
-    this.saldo = saldo;
   }
 
   public void validarMontoNoNegativo(double monto) {
@@ -96,9 +85,15 @@ public class Cuenta {
     }
   }
 
-  public long cantidadDepositos() {
-    return this.movimientos.stream().filter(movimiento -> movimiento.isDeposito()).count();
+  public double getMontoExtraidoA(LocalDate fecha) {
+    return this.movimientos.stream()
+        .filter(movimiento -> movimiento.fueExtraido(fecha))
+        .mapToDouble(Movimiento::getMonto)
+        .sum();
   }
 
+  public long cantidadDepositos() {
+    return this.movimientos.stream().filter(movimiento -> movimiento.getTipo().isDeposito()).count();
+  }
 
 }
