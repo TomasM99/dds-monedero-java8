@@ -31,16 +31,22 @@ public class Cuenta {
     this.validarMontoNoNegativo(cuanto);
     this.validarMaximaCantidadDepositos();
 
-    new Movimiento(LocalDate.now(), cuanto, true).agregateA(this); //MIDDLE MAN
+    this.agregarMovimiento(LocalDate.now(), cuanto, true);
+    this.modificarSaldo(cuanto);
   }
 
-  public void sacar(double cuanto) { //LONG METHOD
+  public void sacar(double cuanto) {
 
     this.validarMontoNoNegativo(cuanto);
     this.validarNoSacarMasDeLoQueHay(cuanto);
     this.validarNoExtraerMasDelLimite(cuanto);
 
-    new Movimiento(LocalDate.now(), cuanto, false).agregateA(this); //MIDDLE MAN
+    this.agregarMovimiento(LocalDate.now(), cuanto, false);
+    this.modificarSaldo(-cuanto);
+  }
+
+  public void modificarSaldo(double monto) {
+    this.saldo += monto;
   }
 
   public void agregarMovimiento(LocalDate fecha, double cuanto, boolean esDeposito) {
@@ -50,17 +56,9 @@ public class Cuenta {
 
   public double getMontoExtraidoA(LocalDate fecha) {
     return this.movimientos.stream()
-        .filter(movimiento -> this.extracionesDeLaFecha(movimiento, fecha))
+        .filter(movimiento -> movimiento.fueExtraido(fecha))
         .mapToDouble(Movimiento::getMonto)
         .sum();
-  }
-
-  public boolean extracionesDeLaFecha(Movimiento movimiento,LocalDate fecha) {
-    return !movimiento.isDeposito() && movimiento.getFecha().equals(fecha);
-  }
-
-  public List<Movimiento> getMovimientos() {
-    return movimientos;
   }
 
   public double getSaldo() {

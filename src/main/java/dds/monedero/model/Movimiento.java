@@ -19,10 +19,6 @@ public class Movimiento {
     return monto;
   }
 
-  public LocalDate getFecha() {
-    return fecha;
-  }
-
   public boolean fueDepositado(LocalDate fecha) {
     return isDeposito() && esDeLaFecha(fecha);
   }
@@ -41,18 +37,5 @@ public class Movimiento {
 
   public boolean isExtraccion() {
     return !esDeposito;
-  }
-
-  public void agregateA(Cuenta cuenta) {
-    cuenta.setSaldo(calcularValor(cuenta));
-    cuenta.agregarMovimiento(fecha, monto, esDeposito);
-  }
-
-  public double calcularValor(Cuenta cuenta) { //FALTA POLIMORFISMO
-    if (esDeposito) {
-      return cuenta.getSaldo() + getMonto();
-    } else {
-      return cuenta.getSaldo() - getMonto();
-    }
   }
 }
