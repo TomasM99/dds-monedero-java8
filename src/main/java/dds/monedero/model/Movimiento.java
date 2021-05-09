@@ -7,7 +7,7 @@ public class Movimiento {
   //En ningún lenguaje de programación usen jamás doubles para modelar dinero en el mundo real
   //siempre usen numeros de precision arbitraria, como BigDecimal en Java y similares
   private double monto;
-  private boolean esDeposito;
+  private boolean esDeposito; //PRIMITE OBSESSION
 
   public Movimiento(LocalDate fecha, double monto, boolean esDeposito) {
     this.fecha = fecha;
@@ -48,7 +48,7 @@ public class Movimiento {
     cuenta.agregarMovimiento(fecha, monto, esDeposito);
   }
 
-  public double calcularValor(Cuenta cuenta) {
+  public double calcularValor(Cuenta cuenta) { //FALTA POLIMORFISMO
     if (esDeposito) {
       return cuenta.getSaldo() + getMonto();
     } else {
