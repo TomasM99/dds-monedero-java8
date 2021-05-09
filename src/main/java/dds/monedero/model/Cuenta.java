@@ -29,10 +29,7 @@ public class Cuenta {
   public void poner(double cuanto) {
 
     this.validarMontoNoNegativo(cuanto);
-
-    if (getMovimientos().stream().filter(movimiento -> movimiento.isDeposito()).count() >= 3) { //MESSAGE CHAINS
-      throw new MaximaCantidadDepositosException("Ya excedio los " + 3 + " depositos diarios");
-    }
+    this.validarMaximaCantidadDepositos();
 
     new Movimiento(LocalDate.now(), cuanto, true).agregateA(this); //MIDDLE MAN
   }
@@ -40,16 +37,9 @@ public class Cuenta {
   public void sacar(double cuanto) { //LONG METHOD
 
     this.validarMontoNoNegativo(cuanto);
+    this.validarNoSacarMasDeLoQueHay(cuanto);
+    this.validarNoExtraerMasDelLimite(cuanto);
 
-    if (getSaldo() - cuanto < 0) {
-      throw new SaldoMenorException("No puede sacar mas de " + getSaldo() + " $");
-    }
-    double montoExtraidoHoy = getMontoExtraidoA(LocalDate.now());
-    double limite = 1000 - montoExtraidoHoy;
-    if (cuanto > limite) {
-      throw new MaximoExtraccionDiarioException("No puede extraer mas de $ " + 1000
-          + " diarios, límite: " + limite);
-    }
     new Movimiento(LocalDate.now(), cuanto, false).agregateA(this); //MIDDLE MAN
   }
 
@@ -82,5 +72,31 @@ public class Cuenta {
       throw new MontoNegativoException(monto + ": el monto a ingresar debe ser un valor positivo");
     }
   }
+
+  public void validarMaximaCantidadDepositos() {
+    if (this.cantidadDepositos() >= 3) {
+      throw new MaximaCantidadDepositosException("Ya excedio los " + 3 + " depositos diarios");
+    }
+  }
+
+  public void validarNoSacarMasDeLoQueHay(double monto) {
+    if (this.saldo - monto < 0) {
+      throw new SaldoMenorException("No puede sacar mas de " + getSaldo() + " $");
+    }
+  }
+
+  public void validarNoExtraerMasDelLimite(double monto) {
+    double montoExtraidoHoy = getMontoExtraidoA(LocalDate.now());
+    double limite = 1000 - montoExtraidoHoy;
+    if (monto > limite) {
+      throw new MaximoExtraccionDiarioException("No puede extraer mas de $ " + 1000
+          + " diarios, límite: " + limite);
+    }
+  }
+
+  public long cantidadDepositos() {
+    return this.movimientos.stream().filter(movimiento -> movimiento.isDeposito()).count();
+  }
+
 
 }
